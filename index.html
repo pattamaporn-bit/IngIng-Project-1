@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School RFID Attendance V3</title>
+    <title>School RFID Attendance V3.1 (Date & Time)</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; background-color: #f0f2f5; }
+        body { font-family: 'Sarabun', 'Segoe UI', sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; background-color: #f0f2f5; }
         .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         h1, h2 { color: #2c3e50; text-align: center; margin-bottom: 1.5rem; }
         
@@ -18,7 +18,7 @@
         button:hover { background-color: #45a049; }
         
         /* Status Messages */
-        #status { margin-top: 1rem; padding: 15px; border-radius: 6px; text-align: center; display: none; font-weight: bold; }
+        #status { margin-top: 1rem; padding: 15px; border-radius: 6px; text-align: center; display: none; font-weight: bold; font-size: 1.1em; }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
@@ -40,26 +40,26 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div class="container">
-    <h1>🏫 Daily Attendance Check-in</h1>
+    <h1>🏫 ระบบบันทึกเวลาเรียน (Daily Attendance)</h1>
     
-    <p style="text-align:center; color:#666;">Click the box below and scan your card.</p>
+    <p style="text-align:center; color:#666;">คลิกที่ช่องด้านล่างแล้วสแกนบัตร</p>
     <input type="text" id="attendanceInput" placeholder="Scan RFID tag here..." autofocus autocomplete="off">
     
     <div id="status"></div>
 
-    <h3>🕒 Today's Live Log</h3>
+    <h3>🕒 รายการเข้าเรียนล่าสุด (Live Log)</h3>
     <table id="attendanceTable">
         <thead>
             <tr>
-                <th>Photo</th>
-                <th>Time</th>
-                <th>Name</th>
-                <th>Grade</th>
-                <th>ID</th>
+                <th>รูปภาพ</th>
+                <th>วัน-เวลา ที่แตะบัตร</th> <th>ชื่อ-นามสกุล</th>
+                <th>ชั้นเรียน</th>
+                <th>รหัสบัตร</th>
             </tr>
         </thead>
         <tbody>
@@ -69,28 +69,28 @@
 
 <div class="container admin-box">
     <div class="admin-title">Teacher Control Panel</div>
-    <h2>➕ Register New Student</h2>
+    <h2>➕ ลงทะเบียนนักเรียนใหม่</h2>
     
     <div class="form-grid">
-        <input type="text" id="regName" placeholder="Full Name (e.g. Somchai)">
+        <input type="text" id="regName" placeholder="ชื่อ-นามสกุล (เช่น ด.ช.สมชาย)">
         <select id="regGrade">
-            <option value="" disabled selected>Select Grade</option>
-            <option value="Grade 1">Grade 1</option>
-            <option value="Grade 2">Grade 2</option>
-            <option value="Grade 3">Grade 3</option>
-            <option value="Grade 4">Grade 4</option>
-            <option value="Grade 5">Grade 5</option>
-            <option value="Grade 6">Grade 6</option>
-            <option value="Teacher">Teacher</option>
+            <option value="" disabled selected>เลือกระดับชั้น</option>
+            <option value="ป.1">ประถมศึกษาปีที่ 1</option>
+            <option value="ป.2">ประถมศึกษาปีที่ 2</option>
+            <option value="ป.3">ประถมศึกษาปีที่ 3</option>
+            <option value="ป.4">ประถมศึกษาปีที่ 4</option>
+            <option value="ป.5">ประถมศึกษาปีที่ 5</option>
+            <option value="ป.6">ประถมศึกษาปีที่ 6</option>
+            <option value="ครู">คุณครู/บุคลากร</option>
         </select>
     </div>
 
-    <label style="display:block; margin-top:10px; font-size:0.9em; color:#555;">Profile Photo:</label>
+    <label style="display:block; margin-top:10px; font-size:0.9em; color:#555;">รูปโปรไฟล์:</label>
     <input type="file" id="regPhoto" accept="image/*">
 
-    <input type="text" id="regTag" placeholder="Click here & Scan Card to Register..." style="background-color: #fffde7;">
+    <input type="text" id="regTag" placeholder="คลิกที่นี่ แล้วสแกนบัตรเพื่อลงทะเบียน..." style="background-color: #fffde7;">
     
-    <button onclick="registerStudent()">Save Student Profile</button>
+    <button onclick="registerStudent()">บันทึกข้อมูลนักเรียน</button>
 </div>
 
 <script type="module">
@@ -119,8 +119,7 @@ const firebaseConfig = {
       reader.onerror = error => reject(error);
   });
 
-  // --- 2. STUDENT DIRECTORY (The "Phonebook") ---
-  // Now stores Name, Grade, AND Photo
+  // --- 2. STUDENT DIRECTORY ---
   let studentDirectory = {}; 
 
   onSnapshot(collection(db, "students"), (snapshot) => {
@@ -129,7 +128,7 @@ const firebaseConfig = {
           studentDirectory[doc.id] = {
               name: d.name,
               grade: d.grade || "N/A",
-              photo: d.photo || null // Base64 string
+              photo: d.photo || null 
           };
       });
       console.log("Directory updated:", Object.keys(studentDirectory).length + " students loaded.");
@@ -143,13 +142,12 @@ const firebaseConfig = {
       const photoFile = document.getElementById('regPhoto').files[0];
 
       if (!name || !tagId || !grade) {
-          alert("Please fill in Name, Grade, and Scan a Tag!");
+          alert("กรุณากรอกชื่อ, ชั้นเรียน และสแกนบัตร!");
           return;
       }
 
-      // Check if file is too big (Optional safety check: Limit to 500KB)
       if (photoFile && photoFile.size > 500 * 1024) {
-          alert("Photo is too large! Please use a smaller image (under 500KB).");
+          alert("รูปภาพใหญ่เกินไป! กรุณาใช้ไฟล์ขนาดไม่เกิน 500KB");
           return;
       }
 
@@ -165,23 +163,21 @@ const firebaseConfig = {
       }
 
       try {
-          // Save all details to 'students' collection
           await setDoc(doc(db, "students", tagId), {
               name: name,
               grade: grade,
-              photo: photoBase64, // Storing the image string directly
+              photo: photoBase64,
               registeredAt: serverTimestamp()
           });
           
-          alert(`✅ Success! ${name} (${grade}) registered.`);
-          // Clear inputs
+          alert(`✅ ลงทะเบียนสำเร็จ! ${name} (${grade})`);
           document.getElementById('regName').value = '';
           document.getElementById('regGrade').value = '';
           document.getElementById('regTag').value = '';
-          document.getElementById('regPhoto').value = ''; // Reset file input
+          document.getElementById('regPhoto').value = ''; 
       } catch (e) {
           console.error("Error: ", e);
-          alert("❌ Error registering student.");
+          alert("❌ เกิดข้อผิดพลาดในการลงทะเบียน");
       }
   }
 
@@ -200,26 +196,30 @@ const firebaseConfig = {
   });
 
   async function markAttendance(id) {
-      // Look up student details
       const student = studentDirectory[id];
       
-      const studentName = student ? student.name : "Unknown Student";
+      const studentName = student ? student.name : "ไม่พบข้อมูลนักเรียน";
       const studentGrade = student ? student.grade : "--";
       const studentPhoto = student ? student.photo : null;
+
+      // สร้างเวลาปัจจุบันเพื่อแสดงผลทันที (Client side)
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('th-TH');
 
       try {
           await addDoc(collection(db, "attendance"), {
               tag_id: id,
               student_name: studentName,
               student_grade: studentGrade,
-              student_photo: studentPhoto, // We snapshot the photo so logs keep working even if profile changes
+              student_photo: studentPhoto,
               timestamp: serverTimestamp()
           });
           
           if(student) {
-              showStatus(`✅ Welcome, ${studentName}!`, "success");
+              // เพิ่มการแสดงเวลาในข้อความแจ้งเตือน
+              showStatus(`✅ ยินดีต้อนรับ, ${studentName}!<br>⏰ เวลา: ${timeString}`, "success");
           } else {
-              showStatus(`⚠️ Unregistered Tag: ${id}`, "error");
+              showStatus(`⚠️ บัตรนี้ยังไม่ได้ลงทะเบียน: ${id}`, "error");
           }
       } catch (e) {
           console.error(e);
@@ -228,10 +228,12 @@ const firebaseConfig = {
   }
 
   function showStatus(msg, type) {
-      statusDiv.textContent = msg;
+      statusDiv.innerHTML = msg; // เปลี่ยนเป็น innerHTML เพื่อใช้ <br> ได้
       statusDiv.className = type;
       statusDiv.style.display = 'block';
-      setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
+      
+      // ตั้งเวลาให้กล่องข้อความหายไปหลัง 4 วินาที
+      setTimeout(() => { statusDiv.style.display = 'none'; }, 4000);
   }
 
   // --- 5. SHOW TABLE ---
@@ -243,10 +245,23 @@ const firebaseConfig = {
       
       snapshot.forEach((doc) => {
           const data = doc.data();
-          let dateStr = "Just now";
-          if (data.timestamp) dateStr = data.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          
+          // --- ส่วนที่แก้ไข: การจัดการเวลาและวันที่ ---
+          let dateStr = "กำลังบันทึก...";
+          if (data.timestamp) {
+              const dateObj = data.timestamp.toDate();
+              // รูปแบบ: 29/01/2024 10:30:45
+              dateStr = dateObj.toLocaleString('th-TH', {
+                  year: 'numeric', 
+                  month: '2-digit', 
+                  day: '2-digit', 
+                  hour: '2-digit', 
+                  minute:'2-digit', 
+                  second:'2-digit'
+              });
+          }
+          // --------------------------------------
 
-          // Handle Photo Logic
           let imgHtml = `<div class="no-pic">?</div>`;
           if (data.student_photo) {
               imgHtml = `<img src="${data.student_photo}" class="profile-pic">`;
@@ -254,8 +269,7 @@ const firebaseConfig = {
 
           const row = `<tr>
               <td>${imgHtml}</td>
-              <td>${dateStr}</td>
-              <td style="font-weight:bold; color:#333;">${data.student_name || "Unknown"}</td>
+              <td style="font-weight:bold; color:#0056b3;">${dateStr}</td> <td style="font-weight:bold; color:#333;">${data.student_name || "Unknown"}</td>
               <td><span style="background:#e8f5e9; padding:4px 8px; border-radius:10px; font-size:0.85em; color:#2e7d32;">${data.student_grade || "N/A"}</span></td>
               <td style="color:#999; font-size:0.85em;">${data.tag_id}</td>
           </tr>`;
