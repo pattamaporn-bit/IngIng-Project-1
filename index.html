@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School RFID Attendance V3.1 (Date & Time)</title>
+    <title>School RFID Attendance V3.3 (Edit & Delete)</title>
     <style>
-        body { font-family: 'Sarabun', 'Segoe UI', sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; background-color: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 950px; margin: 2rem auto; padding: 0 1rem; background-color: #f0f2f5; }
         .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         h1, h2 { color: #2c3e50; text-align: center; margin-bottom: 1.5rem; }
         
@@ -17,6 +17,14 @@
         button { width: 100%; padding: 14px; background-color: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.2s; }
         button:hover { background-color: #45a049; }
         
+        /* Action Buttons */
+        .btn-group { display: flex; gap: 5px; justify-content: center; }
+        .btn-action { padding: 6px 10px; font-size: 14px; border-radius: 4px; border: none; cursor: pointer; color: white; }
+        .btn-delete { background-color: #ff4d4d; }
+        .btn-delete:hover { background-color: #cc0000; }
+        .btn-edit { background-color: #3498db; }
+        .btn-edit:hover { background-color: #2980b9; }
+
         /* Status Messages */
         #status { margin-top: 1rem; padding: 15px; border-radius: 6px; text-align: center; display: none; font-weight: bold; font-size: 1.1em; }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
@@ -39,27 +47,34 @@
         /* Grid for Form */
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+        /* --- MODAL (POPUP) STYLES --- */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 8px; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: black; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div class="container">
-    <h1>🏫 ระบบบันทึกเวลาเรียน (Daily Attendance)</h1>
+    <h1>🏫 Daily Attendance Check-in</h1>
     
-    <p style="text-align:center; color:#666;">คลิกที่ช่องด้านล่างแล้วสแกนบัตร</p>
+    <p style="text-align:center; color:#666;">Click the box below and scan your card.</p>
     <input type="text" id="attendanceInput" placeholder="Scan RFID tag here..." autofocus autocomplete="off">
     
     <div id="status"></div>
 
-    <h3>🕒 รายการเข้าเรียนล่าสุด (Live Log)</h3>
+    <h3>🕒 Live Log</h3>
     <table id="attendanceTable">
         <thead>
             <tr>
-                <th>รูปภาพ</th>
-                <th>วัน-เวลา ที่แตะบัตร</th> <th>ชื่อ-นามสกุล</th>
-                <th>ชั้นเรียน</th>
-                <th>รหัสบัตร</th>
+                <th>Photo</th>
+                <th>Time</th>
+                <th>Name</th>
+                <th>Grade</th>
+                <th>ID</th>
+                <th style="text-align:center;">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -69,33 +84,58 @@
 
 <div class="container admin-box">
     <div class="admin-title">Teacher Control Panel</div>
-    <h2>➕ ลงทะเบียนนักเรียนใหม่</h2>
+    <h2>➕ Register New Student</h2>
     
     <div class="form-grid">
-        <input type="text" id="regName" placeholder="ชื่อ-นามสกุล (เช่น ด.ช.สมชาย)">
+        <input type="text" id="regName" placeholder="Full Name (e.g. John Doe)">
         <select id="regGrade">
-            <option value="" disabled selected>เลือกระดับชั้น</option>
-            <option value="ป.1">ประถมศึกษาปีที่ 1</option>
-            <option value="ป.2">ประถมศึกษาปีที่ 2</option>
-            <option value="ป.3">ประถมศึกษาปีที่ 3</option>
-            <option value="ป.4">ประถมศึกษาปีที่ 4</option>
-            <option value="ป.5">ประถมศึกษาปีที่ 5</option>
-            <option value="ป.6">ประถมศึกษาปีที่ 6</option>
-            <option value="ครู">คุณครู/บุคลากร</option>
+            <option value="" disabled selected>Select Grade</option>
+            <option value="Grade 1">Grade 1</option>
+            <option value="Grade 2">Grade 2</option>
+            <option value="Grade 3">Grade 3</option>
+            <option value="Grade 4">Grade 4</option>
+            <option value="Grade 5">Grade 5</option>
+            <option value="Grade 6">Grade 6</option>
+            <option value="Teacher">Teacher</option>
         </select>
     </div>
 
-    <label style="display:block; margin-top:10px; font-size:0.9em; color:#555;">รูปโปรไฟล์:</label>
+    <label style="display:block; margin-top:10px; font-size:0.9em; color:#555;">Profile Photo:</label>
     <input type="file" id="regPhoto" accept="image/*">
 
-    <input type="text" id="regTag" placeholder="คลิกที่นี่ แล้วสแกนบัตรเพื่อลงทะเบียน..." style="background-color: #fffde7;">
+    <input type="text" id="regTag" placeholder="Click here & Scan Card to Register..." style="background-color: #fffde7;">
     
-    <button onclick="registerStudent()">บันทึกข้อมูลนักเรียน</button>
+    <button onclick="registerStudent()">Save Student Profile</button>
+</div>
+
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2 style="margin-top:0;">✏️ Edit Record</h2>
+    <input type="hidden" id="editDocId">
+    
+    <label>Student Name:</label>
+    <input type="text" id="editName">
+    
+    <label>Grade:</label>
+    <select id="editGrade">
+        <option value="Grade 1">Grade 1</option>
+        <option value="Grade 2">Grade 2</option>
+        <option value="Grade 3">Grade 3</option>
+        <option value="Grade 4">Grade 4</option>
+        <option value="Grade 5">Grade 5</option>
+        <option value="Grade 6">Grade 6</option>
+        <option value="Teacher">Teacher</option>
+    </select>
+    
+    <button onclick="saveEdit()" style="margin-top:15px; background-color: #3498db;">Save Changes</button>
+  </div>
 </div>
 
 <script type="module">
+  // Added 'updateDoc' to imports
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, setDoc, doc, onSnapshot, query, orderBy, limit, serverTimestamp } 
+  import { getFirestore, collection, addDoc, setDoc, deleteDoc, updateDoc, doc, onSnapshot, query, orderBy, limit, serverTimestamp } 
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -106,7 +146,6 @@ const firebaseConfig = {
   messagingSenderId: "573586079577",
   appId: "1:573586079577:web:d5ed2353ee458f22d95648"
 };
-  // ----------------------------------------
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
@@ -131,7 +170,6 @@ const firebaseConfig = {
               photo: d.photo || null 
           };
       });
-      console.log("Directory updated:", Object.keys(studentDirectory).length + " students loaded.");
   });
 
   // --- 3. REGISTRATION LOGIC ---
@@ -142,12 +180,12 @@ const firebaseConfig = {
       const photoFile = document.getElementById('regPhoto').files[0];
 
       if (!name || !tagId || !grade) {
-          alert("กรุณากรอกชื่อ, ชั้นเรียน และสแกนบัตร!");
+          alert("Please fill in Name, Grade, and Scan a Tag!");
           return;
       }
 
       if (photoFile && photoFile.size > 500 * 1024) {
-          alert("รูปภาพใหญ่เกินไป! กรุณาใช้ไฟล์ขนาดไม่เกิน 500KB");
+          alert("Photo too large! Please use image under 500KB.");
           return;
       }
 
@@ -157,7 +195,6 @@ const firebaseConfig = {
               photoBase64 = await toBase64(photoFile);
           } catch(e) {
               console.error("Error processing image", e);
-              alert("Error processing image file.");
               return;
           }
       }
@@ -170,113 +207,16 @@ const firebaseConfig = {
               registeredAt: serverTimestamp()
           });
           
-          alert(`✅ ลงทะเบียนสำเร็จ! ${name} (${grade})`);
+          alert(`✅ Success! ${name} registered.`);
           document.getElementById('regName').value = '';
           document.getElementById('regGrade').value = '';
           document.getElementById('regTag').value = '';
           document.getElementById('regPhoto').value = ''; 
       } catch (e) {
           console.error("Error: ", e);
-          alert("❌ เกิดข้อผิดพลาดในการลงทะเบียน");
+          alert("❌ Error registering student.");
       }
   }
 
   // --- 4. ATTENDANCE LOGIC ---
   const attendanceInput = document.getElementById('attendanceInput');
-  const statusDiv = document.getElementById('status');
-
-  attendanceInput.addEventListener('keypress', async (e) => {
-      if (e.key === 'Enter') {
-          const tagId = attendanceInput.value.trim();
-          if (tagId) {
-              await markAttendance(tagId);
-              attendanceInput.value = ''; 
-          }
-      }
-  });
-
-  async function markAttendance(id) {
-      const student = studentDirectory[id];
-      
-      const studentName = student ? student.name : "ไม่พบข้อมูลนักเรียน";
-      const studentGrade = student ? student.grade : "--";
-      const studentPhoto = student ? student.photo : null;
-
-      // สร้างเวลาปัจจุบันเพื่อแสดงผลทันที (Client side)
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('th-TH');
-
-      try {
-          await addDoc(collection(db, "attendance"), {
-              tag_id: id,
-              student_name: studentName,
-              student_grade: studentGrade,
-              student_photo: studentPhoto,
-              timestamp: serverTimestamp()
-          });
-          
-          if(student) {
-              // เพิ่มการแสดงเวลาในข้อความแจ้งเตือน
-              showStatus(`✅ ยินดีต้อนรับ, ${studentName}!<br>⏰ เวลา: ${timeString}`, "success");
-          } else {
-              showStatus(`⚠️ บัตรนี้ยังไม่ได้ลงทะเบียน: ${id}`, "error");
-          }
-      } catch (e) {
-          console.error(e);
-          showStatus("❌ System Error.", "error");
-      }
-  }
-
-  function showStatus(msg, type) {
-      statusDiv.innerHTML = msg; // เปลี่ยนเป็น innerHTML เพื่อใช้ <br> ได้
-      statusDiv.className = type;
-      statusDiv.style.display = 'block';
-      
-      // ตั้งเวลาให้กล่องข้อความหายไปหลัง 4 วินาที
-      setTimeout(() => { statusDiv.style.display = 'none'; }, 4000);
-  }
-
-  // --- 5. SHOW TABLE ---
-  const q = query(collection(db, "attendance"), orderBy("timestamp", "desc"), limit(10));
-  
-  onSnapshot(q, (snapshot) => {
-      const tbody = document.querySelector('#attendanceTable tbody');
-      tbody.innerHTML = ''; 
-      
-      snapshot.forEach((doc) => {
-          const data = doc.data();
-          
-          // --- ส่วนที่แก้ไข: การจัดการเวลาและวันที่ ---
-          let dateStr = "กำลังบันทึก...";
-          if (data.timestamp) {
-              const dateObj = data.timestamp.toDate();
-              // รูปแบบ: 29/01/2024 10:30:45
-              dateStr = dateObj.toLocaleString('th-TH', {
-                  year: 'numeric', 
-                  month: '2-digit', 
-                  day: '2-digit', 
-                  hour: '2-digit', 
-                  minute:'2-digit', 
-                  second:'2-digit'
-              });
-          }
-          // --------------------------------------
-
-          let imgHtml = `<div class="no-pic">?</div>`;
-          if (data.student_photo) {
-              imgHtml = `<img src="${data.student_photo}" class="profile-pic">`;
-          }
-
-          const row = `<tr>
-              <td>${imgHtml}</td>
-              <td style="font-weight:bold; color:#0056b3;">${dateStr}</td> <td style="font-weight:bold; color:#333;">${data.student_name || "Unknown"}</td>
-              <td><span style="background:#e8f5e9; padding:4px 8px; border-radius:10px; font-size:0.85em; color:#2e7d32;">${data.student_grade || "N/A"}</span></td>
-              <td style="color:#999; font-size:0.85em;">${data.tag_id}</td>
-          </tr>`;
-          tbody.innerHTML += row;
-      });
-  });
-</script>
-
-</body>
-</html>
